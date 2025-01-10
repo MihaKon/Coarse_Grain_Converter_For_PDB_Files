@@ -108,13 +108,18 @@ def main():
     if args.pdb_file_input and args.coarse_grain_input:
         raise ValueError("Please provide only one input file")
 
-    if not args.pdb_file_input:
+    if args.pdb_file_input:
         file_name = args.pdb_file_input.name.split(".")[0].upper()
-        structure = read_pdb(args.coarse_grain_input, file_name)
+
+        structure = read_pdb(args.pdb_file_input, file_name)
 
         coarse_grain_file_name = f"{file_name}_coarse_grain.pdb"
-        coarse_grain_file_path = args.coarse_grain_input.parent / coarse_grain_file_name
+        coarse_grain_file_path = args.pdb_file_input.parent / coarse_grain_file_name
         save_structure(structure, coarse_grain_file_path, as_coarse_grain=True)
+    else:
+        file_name = args.coarse_grain_input.name.split(".")[0]
+        coarse_grain_file_name = args.coarse_grain_input.name
+        coarse_grain_file_path = args.coarse_grain_input
 
     templates = parse_residue_templates(TEMPLATES_PATH)
     coarse_grain_structure = PDBParser().get_structure(
@@ -123,7 +128,7 @@ def main():
     reconstructed_structure = reconstruct_pdb(coarse_grain_structure, templates)
     reco_file_name = f"{file_name}_reconstructed.pdb"
     save_structure(
-        reconstructed_structure, args.coarse_grain_input.parent / reco_file_name
+        reconstructed_structure, coarse_grain_file_path.parent / reco_file_name
     )
 
 
